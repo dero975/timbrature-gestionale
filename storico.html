@@ -2,82 +2,56 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Storico Timbrature</title>
-  <style>
-    body {
-      background-color: #0f172a;
-      color: white;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    h1 {
-      text-align: center;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    th, td {
-      border: 1px solid #334155;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #1e293b;
-    }
-    td {
-      background-color: #1f2937;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 </head>
-<body>
-  <h1>Storico Timbrature</h1>
-  <div id="intestazione"></div>
-  <table>
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Timbrature</th>
-      </tr>
-    </thead>
-    <tbody id="tabella-storico"></tbody>
-  </table>
+<body class="body-dark">
+
+  <h2 class="titolo-secondario">Storico Timbrature</h2>
+  <h1 id="nomeUtente" class="nome-utente">Mario Rossi</h1>
+
+  <div class="filtro-mese">
+    <select id="selettoreMese" class="data-box">
+      <option value="corrente">mese corrente</option>
+    </select>
+    <div class="data-box" id="dataInizio">01/05/2025</div>
+    <div class="data-box" id="dataFine">31/05/2025</div>
+  </div>
+
+  <div class="contenitore-tabella">
+    <table class="tabella">
+      <thead>
+        <tr>
+          <th>Giorno</th>
+          <th>Entrata</th>
+          <th>Uscita</th>
+          <th>Totale ore</th>
+        </tr>
+      </thead>
+      <tbody id="tabellaTimbrature">
+        <!-- Popolato da script.js -->
+      </tbody>
+    </table>
+    <div class="totale-mensile">
+      Totale mensile: <span id="totaleOre">0 ore</span>
+    </div>
+  </div>
+
+  <div class="bottoni">
+    <a href="utenti.html" class="btn btn-grigio">← Torna all’Archivio Utenti</a>
+    <button class="btn btn-giallo" onclick="esportaExcel()">📥 Esporta Excel</button>
+    <button class="btn btn-bianco" onclick="inviaEmail()">✉️ Invia per email</button>
+  </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const pin = params.get("pin");
-
-    const dipendenti = JSON.parse(localStorage.getItem("dipendenti") || "[]");
-    const utente = dipendenti.find(d => d.pin === pin);
-
-    const intestazione = document.getElementById("intestazione");
-    if (!utente) {
-      intestazione.innerText = "Dipendente non trovato.";
-    } else {
-      intestazione.innerText = `${utente.nome} ${utente.cognome} – PIN ${pin}`;
-    }
-
-    const storico = JSON.parse(localStorage.getItem("storico") || "{}");
-    const datiUtente = storico[pin] || {};
-
-    const tbody = document.getElementById("tabella-storico");
-    const date = Object.keys(datiUtente).sort().reverse();
-
-    date.forEach(data => {
-      const sessioni = datiUtente[data];
-      const sessioniTxt = sessioni.map(s => {
-        const entrata = s.entrata || "--:--";
-        const uscita = s.uscita || "--:--";
-        return `Entrata ${entrata} / Uscita ${uscita}`;
-      }).join(" – ");
-
-      const row = document.createElement("tr");
-      row.innerHTML = `<td>${data}</td><td>${sessioniTxt}</td>`;
-      tbody.appendChild(row);
-    });
+    (function() {
+      emailjs.init("TUA_USER_ID"); // Inserisci il tuo ID di EmailJS
+    })();
   </script>
+  <script src="script.js"></script>
 </body>
 </html>
 

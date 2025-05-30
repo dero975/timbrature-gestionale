@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Archivio Dipendenti</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="contenitore">
+    <h1>Archivio Dipendenti</h1>
+
+    <form id="form-aggiungi" class="form-riga">
+      <input type="text" id="nome" placeholder="Nome" required />
+      <input type="text" id="cognome" placeholder="Cognome" required />
+      <input type="text" id="pin" placeholder="PIN (max 2 cifre)" required maxlength="2" />
+      <input type="email" id="email" placeholder="Email" required />
+      <button type="submit">Aggiungi</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>PIN</th>
+          <th>Nome</th>
+          <th>Cognome</th>
+          <th>Email</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody id="tabella-utenti"></tbody>
+    </table>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(
+      "https://pylfpqitdogatlsndxtf.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bGZwcWl0ZG9nYXRsc25keHRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNzU5OTcsImV4cCI6MjA2Mzk1MTk5N30.GXWmglDP7WcLSozta8UT6Ktd9XzIXSCxC5pJ4oWX3LU"
+    );
+
+    const form = document.getElementById("form-aggiungi");
+    const tbody = document.getElementById("tabella-utenti");
+
+    async function caricaUtenti() {
+      const { data, error } = await supabase.from("utenti").select("*").order("pin");
+      if (error) {
+        alert("Errore durante il caricamento utenti: " + error.message);
+        return;
+      }
+
+      tbody.innerHTML = "";
+      data.forEach(utente => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${utente.pin}</td>
+          <td>${utente.nome}</td>
+          <td>${utente.cognome}</td>
+          <td>${utente.email}</td>
+          <td>
+            <a href="storico.html?pin=${utente.pin}" title="Storico">📘</a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nome = document.getElementById("nome").value.trim();
+      const cognome = document.getElementById("cognome").value.trim();
+      const pin = document.getElementById("pin").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      if (!nome || !cognome || !pin || !email) {
+        alert("Tutti i campi sono obbligatori.");
+        return;
+      }
+
+      const { error } = await supabase.from("utenti").insert([{ nome, cognome, pin, email }]);
+      if (error) {
+        alert("Errore durante l'inserimento: " + error.message);
+        return;
+      }
+
+      form.reset();
+      await caricaUtenti();
+    });
+
+    caricaUtenti();
+  </script>
+</body>
+</html>
+

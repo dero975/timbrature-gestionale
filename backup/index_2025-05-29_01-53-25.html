@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timbratura</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background-color: #1e1e1e;
+      padding: 30px;
+      border-radius: 20px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #pin {
+      font-size: 1.5em;
+      padding: 10px;
+      width: 80%;
+      max-width: 300px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border: none;
+      text-align: center;
+    }
+
+    .status {
+      margin: 10px auto 20px;
+      background-color: #222;
+      padding: 10px;
+      border-radius: 10px;
+      width: fit-content;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      grid-gap: 15px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .keypad button {
+      width: 80px;
+      height: 80px;
+      font-size: 1.5em;
+      border: none;
+      border-radius: 50%;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+    }
+
+    .keypad .zero {
+      grid-column: 1 / 2;
+    }
+
+    .keypad .clear {
+      grid-column: 2 / 3;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .buttons button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    .entrata {
+      background-color: green;
+      color: white;
+    }
+
+    .uscita {
+      background-color: red;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Timbratura</h1>
+    <input type="text" id="pin" placeholder="Inserisci PIN" maxlength="2" />
+    <div class="status">Ultima timbratura: nessuna</div>
+    <div class="keypad">
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button class="zero">0</button>
+      <button class="clear">C</button>
+    </div>
+    <div class="buttons">
+      <button class="entrata">Entrata</button>
+      <button class="uscita">Uscita</button>
+    </div>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  font-family: 'Helvetica Neue', sans-serif;
+  background-color: #0f1d2e;
+  color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  min-height: 100vh;
+}
+
+.container {
+  background-color: #12263a;
+  padding: 30px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+}
+
+h1.nome {
+  text-align: center;
+  margin-bottom: 5px;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+h2.mese {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-weight: normal;
+  color: #c8d6e5;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #22394e;
+}
+
+th {
+  background-color: #1e3a56;
+  color: #ffffff;
+}
+
+.totale {
+  text-align: right;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+button#esporta {
+  background-color: #3b7ddd;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button#esporta:hover {
+  background-color: #2f6ec2;
+}
+
+.filtro-temporale {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.filtro-temporale select,
+.filtro-temporale input[type="date"] {
+  background-color: #1e3a56;
+  border: 1px solid #345;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timbratura</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #1e293b;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 400px;
+      margin: auto;
+    }
+
+    h1, h2 {
+      margin-bottom: 10px;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+
+    .tastierino {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .tastierino button {
+      padding: 15px;
+      font-size: 1.2em;
+      border-radius: 8px;
+      border: none;
+      background-color: #f8fafc;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .azioni {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    .azioni button {
+      flex: 1;
+      padding: 10px;
+      margin: 5px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .entrata {
+      background-color: #22c55e;
+      color: white;
+    }
+
+    .uscita {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .messaggio {
+      margin-top: 15px;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="dataOra"></div>
+    <input type="password" id="pin" placeholder="PIN" maxlength="2" />
+    <div class="tastierino">
+      <button onclick="inserisciNumero('1')">1</button>
+      <button onclick="inserisciNumero('2')">2</button>
+      <button onclick="inserisciNumero('3')">3</button>
+      <button onclick="inserisciNumero('4')">4</button>
+      <button onclick="inserisciNumero('5')">5</button>
+      <button onclick="inserisciNumero('6')">6</button>
+      <button onclick="inserisciNumero('7')">7</button>
+      <button onclick="inserisciNumero('8')">8</button>
+      <button onclick="inserisciNumero('9')">9</button>
+      <button onclick="inserisciNumero('0')">0</button>
+      <button onclick="cancella()">C</button>
+    </div>
+    <div class="azioni">
+      <button class="entrata" onclick="timbratura('entrata')">Entrata</button>
+      <button class="uscita" onclick="timbratura('uscita')">Uscita</button>
+    </div>
+    <div id="messaggio" class="messaggio"></div>
+  </div>
+
+  <script>
+    function inserisciNumero(num) {
+      document.getElementById("pin").value += num;
+    }
+
+    function cancella() {
+      document.getElementById("pin").value = "";
+    }
+
+    function timbratura(tipo) {
+      const pin = document.getElementById("pin").value;
+      const messaggio = document.getElementById("messaggio");
+
+      if (pin === "01") {
+        const ora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const nome = "DAVIDE DE ROSE";
+        const testo = `${nome}<br>${tipo.toUpperCase()} CONFERMATA<br>ore ${ora}`;
+        messaggio.innerHTML = testo;
+      } else {
+        messaggio.innerHTML = "PIN non valido.";
+      }
+
+      document.getElementById("pin").value = "";
+    }
+
+    function aggiornaDataOra() {
+      const oggi = new Date();
+      const data = oggi.toLocaleDateString('it-IT', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+      const ora = oggi.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById("dataOra").innerHTML = `${data} – ${ora}`;
+    }
+
+    aggiornaDataOra();
+    setInterval(aggiornaDataOra, 60000);
+  </script>
+</body>
+</html>
+

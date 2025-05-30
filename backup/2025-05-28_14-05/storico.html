@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Storico Timbrature</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <a href="utenti.html" style="color:#4ea1ff;">← Torna all’archivio dipendenti</a>
+    <h1 id="intestazione">Storico</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Entrata</th>
+          <th>Uscita</th>
+          <th>Ore</th>
+        </tr>
+      </thead>
+      <tbody id="tabella-storico"></tbody>
+    </table>
+
+    <button id="esporta">🗎 Esporta Excel</button>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(
+      "https://pylfpqitdogatlsndxtf.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bGZwcWl0ZG9nYXRsc25keHRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNzU5OTcsImV4cCI6MjA2Mzk1MTk5N30.GXWmglDP7WcLSozta8UT6Ktd9XzIXSCxC5pJ4oWX3LU"
+    );
+
+    const pin = new URLSearchParams(location.search).get("pin")?.padStart(2, "0");
+
+    // 🔽 Recupera nome e cognome per intestazione
+    const { data: utenti } = await supabase.from("utenti").select("nome, cognome").eq("pin", pin);
+    if (utenti && utenti.length > 0) {
+      const u = utenti[0];
+      document.getElementById("intestazione").textContent = `Storico: ${u.nome} ${u.cognome}`;
+    } else {
+      document.getElementById("intestazione").textContent = `Storico PIN ${pin}`;
+    }
+
+    // 🔽 Carica timbrature associate
+    const { data, error } = await supabase
+      .from("timbrature")
+      .select("data, ora, tipo")
+      .eq("pin", pin)
+      .order("data", { ascending: true })
+      .order("ora", { ascending: true });
+
+    if (error) {
+      alert("Errore durante il caricamento: " + error.message);
+      throw error;
+    }
+
+    const perData = {};
+    data.forEach(row => {
+      const giorno = row.data;
+      if (!giorno) return;
+      if (!perData[giorno]) perData[giorno] = {};
+      if (row.tipo === "ENTRATA") perData[giorno].entrata = row.ora;
+      if (row.tipo === "USCITA") perData[giorno].uscita = row.ora;
+    });
+
+    const tbody = document.getElementById("tabella-storico");
+    const righeCSV = [["Data", "Entrata", "Uscita", "Ore"]];
+
+    Object.entries(perData).forEach(([giorno, valori]) => {
+      const entrata = valori.entrata || "—";
+      const uscita = valori.uscita || "—";
+
+      let ore = "—";
+      if (entrata !== "—" && uscita !== "—") {
+        const e = new Date(`1970-01-01T${entrata}`);
+        const u = new Date(`1970-01-01T${uscita}`);
+        const diff = (u - e) / 3600000;
+        ore = diff.toFixed(2);
+      }
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${giorno}</td><td>${entrata}</td><td>${uscita}</td><td>${ore}</td>`;
+      tbody.appendChild(tr);
+      righeCSV.push([giorno, entrata, uscita, ore]);
+    });
+
+    document.getElementById("esporta").addEventListener("click", () => {
+      let csvContent = "data:text/csv;charset=utf-8," + righeCSV.map(r => r.join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `storico_pin_${pin}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
+  </script>
+</body>
+</html>
+

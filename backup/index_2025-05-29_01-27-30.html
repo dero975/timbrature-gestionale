@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timbratura</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #pin {
+      font-size: 2em;
+      padding: 10px;
+      text-align: center;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto 20px auto;
+      border-radius: 10px;
+      border: none;
+    }
+    #feedback {
+      margin-bottom: 20px;
+      font-size: 1.2em;
+      min-height: 30px;
+    }
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      gap: 10px;
+      justify-content: center;
+      margin: 0 auto 20px auto;
+    }
+    .keypad button {
+      background-color: #333;
+      color: #fff;
+      font-size: 1.5em;
+      padding: 20px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      width: 80px;
+      height: 80px;
+    }
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .action-buttons button {
+      font-size: 1.2em;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .entrata {
+      background-color: #28a745;
+    }
+    .uscita {
+      background-color: #dc3545;
+    }
+    #last-entry {
+      background-color: #222;
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 300px;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Timbratura</h1>
+  <input type="password" id="pin" placeholder="Inserisci PIN" maxlength="2" />
+  <div id="feedback"></div>
+
+  <div class="keypad">
+    <button onclick="appendPin('1')">1</button>
+    <button onclick="appendPin('2')">2</button>
+    <button onclick="appendPin('3')">3</button>
+    <button onclick="appendPin('4')">4</button>
+    <button onclick="appendPin('5')">5</button>
+    <button onclick="appendPin('6')">6</button>
+    <button onclick="appendPin('7')">7</button>
+    <button onclick="appendPin('8')">8</button>
+    <button onclick="appendPin('9')">9</button>
+    <button onclick="clearPin()">C</button>
+    <button onclick="appendPin('0')">0</button>
+  </div>
+
+  <div class="action-buttons">
+    <button class="entrata" onclick="timbratura('entrata')">Entrata</button>
+    <button class="uscita" onclick="timbratura('uscita')">Uscita</button>
+  </div>
+
+  <div id="last-entry">Ultima timbratura: nessuna</div>
+
+  <script>
+    function appendPin(num) {
+      const pinInput = document.getElementById('pin');
+      if (pinInput.value.length < 2) {
+        pinInput.value += num;
+      }
+    }
+
+    function clearPin() {
+      document.getElementById('pin').value = '';
+    }
+
+    function timbratura(tipo) {
+      const pin = document.getElementById('pin').value;
+      const feedback = document.getElementById('feedback');
+      if (pin.length !== 2) {
+        feedback.textContent = 'Inserisci un PIN valido (2 cifre).';
+        return;
+      }
+      const ora = new Date().toLocaleTimeString();
+      const tipoTesto = tipo === 'entrata' ? 'Entrata' : 'Uscita';
+      document.getElementById('last-entry').textContent = `Ultima timbratura: ${tipoTesto} alle ${ora} (PIN ${pin})`;
+      feedback.textContent = `Timbratura di ${tipoTesto} registrata.`;
+      clearPin();
+    }
+  </script>
+</body>
+</html>
+

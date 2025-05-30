@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archivio Dipendenti</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      padding: 20px;
+    }
+    .container {
+      background-color: #1e293b;
+      padding: 20px;
+      border-radius: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: center;
+      padding: 10px;
+      border: 1px solid #334155;
+    }
+    th {
+      background-color: #111827;
+    }
+    td {
+      background-color: #1f2937;
+    }
+    .azione-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .azione-btn img {
+      width: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Archivio Dipendenti</h1>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+      <input
+        type="text"
+        id="nome"
+        placeholder="Nome"
+        style="flex: 1; min-width: 120px; padding: 10px; border-radius: 5px; border: none;"
+      />
+      <input
+        type="text"
+        id="cognome"
+        placeholder="Cognome"
+        style="flex: 1; min-width: 120px; padding: 10px; border-radius: 5px; border: none;"
+      />
+      <input
+        type="text"
+        id="pin"
+        placeholder="PIN"
+        style="width: 80px; padding: 10px; border-radius: 5px; border: none;"
+      />
+      <input
+        type="email"
+        id="email"
+        placeholder="Email"
+        style="flex: 2; min-width: 180px; padding: 10px; border-radius: 5px; border: none;"
+      />
+      <button
+        onclick="aggiungiDipendente()"
+        style="padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer;"
+      >
+        Aggiungi
+      </button>
+    </div>
+
+    <table class="table table-bordered table-striped table-dark">
+      <thead>
+        <tr>
+          <th></th>
+          <th>PIN</th>
+          <th>Nome</th>
+          <th>Cognome</th>
+          <th>Email</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody id="tabella-dipendenti">
+        <!-- Le righe verranno aggiunte qui -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function aggiungiDipendente() {
+      const nome = document.getElementById("nome").value;
+      const cognome = document.getElementById("cognome").value;
+      const pin = document.getElementById("pin").value;
+      const email = document.getElementById("email").value;
+
+      if (!nome || !cognome || !pin || !email) {
+        alert("Compila tutti i campi!");
+        return;
+      }
+
+      const tbody = document.getElementById("tabella-dipendenti");
+      const riga = document.createElement("tr");
+
+      riga.innerHTML = `
+        <td><img src="orologio.png" alt="Storico" style="width: 20px;"></td>
+        <td>${pin}</td>
+        <td>${nome}</td>
+        <td>${cognome}</td>
+        <td>${email}</td>
+        <td>
+          <button class="azione-btn" onclick="modificaDipendente(this)">
+            <img src="modifica.png" alt="Modifica">
+          </button>
+          <button class="azione-btn" onclick="eliminaDipendente(this)">
+            <img src="cancella.png" alt="Elimina">
+          </button>
+        </td>
+      `;
+      tbody.appendChild(riga);
+
+      // Pulisci i campi
+      document.getElementById("nome").value = "";
+      document.getElementById("cognome").value = "";
+      document.getElementById("pin").value = "";
+      document.getElementById("email").value = "";
+    }
+
+    function eliminaDipendente(bottone) {
+      const riga = bottone.closest("tr");
+      riga.remove();
+    }
+
+    function modificaDipendente(bottone) {
+      alert("Funzione modifica non ancora implementata.");
+    }
+  </script>
+</body>
+</html>
+

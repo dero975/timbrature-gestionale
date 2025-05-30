@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timbratura</title>
+  <style>
+    body {
+      background-color: #0f0f0f;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+    }
+    .container {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 20px;
+      width: 300px;
+      margin: 40px auto;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+    #pin {
+      font-size: 24px;
+      text-align: center;
+      padding: 10px;
+      width: 100%;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+    .box-info {
+      background: #2c2c2c;
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 15px;
+      display: none;
+    }
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .keypad button {
+      background-color: #333;
+      color: white;
+      font-size: 22px;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+    }
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .actions button {
+      flex: 1;
+      padding: 10px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+    }
+    .entrata {
+      background-color: green;
+    }
+    .uscita {
+      background-color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Timbratura</h1>
+    <input type="text" id="pin" placeholder="Inserisci PIN" maxlength="2" />
+    <div id="box-conferma" class="box-info"></div>
+    <div class="keypad">
+      <button onclick="inserisci('1')">1</button>
+      <button onclick="inserisci('2')">2</button>
+      <button onclick="inserisci('3')">3</button>
+      <button onclick="inserisci('4')">4</button>
+      <button onclick="inserisci('5')">5</button>
+      <button onclick="inserisci('6')">6</button>
+      <button onclick="inserisci('7')">7</button>
+      <button onclick="inserisci('8')">8</button>
+      <button onclick="inserisci('9')">9</button>
+      <button onclick="inserisci('0')">0</button>
+      <button onclick="cancella()">C</button>
+    </div>
+    <div class="actions">
+      <button class="entrata" onclick="registraTimbratura('entrata')">Entrata</button>
+      <button class="uscita" onclick="registraTimbratura('uscita')">Uscita</button>
+    </div>
+  </div>
+
+  <script>
+    function inserisci(numero) {
+      const input = document.getElementById("pin");
+      if (input.value.length < 2) input.value += numero;
+    }
+
+    function cancella() {
+      document.getElementById("pin").value = "";
+    }
+
+    function registraTimbratura(tipo) {
+      let pin = document.getElementById("pin").value.trim();
+      if (pin.length === 1) pin = "0" + pin;
+      if (!pin) {
+        alert("Inserisci il PIN");
+        return;
+      }
+
+      const dipendenti = JSON.parse(localStorage.getItem("dipendenti") || "[]");
+      const utente = dipendenti.find(d => d.pin === pin);
+      if (!utente) {
+        alert("PIN non valido");
+        return;
+      }
+
+      const oraAttuale = new Date();
+      const orario = oraAttuale.toTimeString().slice(0,5);
+      const data = oraAttuale.toISOString().split("T")[0];
+
+      const storico = JSON.parse(localStorage.getItem("storico") || "{}");
+      if (!storico[pin]) storico[pin] = {};
+      if (!storico[pin][data]) storico[pin][data] = [];
+
+      const sessioni = storico[pin][data];
+
+      if (tipo === "entrata") {
+        sessioni.push({ entrata: orario });
+      } else if (tipo === "uscita") {
+        const ultima = sessioni[sessioni.length - 1];
+        if (!ultima || ultima.uscita) {
+          alert("Devi prima timbrare un'entrata");
+          return;
+        }
+        ultima.uscita = orario;
+      }
+
+      localStorage.setItem("storico", JSON.stringify(storico));
+
+      const box = document.getElementById("box-conferma");
+      box.innerText = `✅ ${utente.nome.toLowerCase()} ${utente.cognome.toLowerCase()}\n${tipo.toUpperCase()} registrata alle ${orario}`;
+      box.style.display = "block";
+
+      document.getElementById("pin").value = "";
+    }
+  </script>
+</body>
+</html>
+

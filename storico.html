@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Storico Timbrature</title>
+  <style>
+    body {
+      background-color: #0f172a;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #334155;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #1e293b;
+    }
+    td {
+      background-color: #1f2937;
+    }
+  </style>
+</head>
+<body>
+  <h1>Storico Timbrature</h1>
+  <div id="intestazione"></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Timbrature</th>
+      </tr>
+    </thead>
+    <tbody id="tabella-storico"></tbody>
+  </table>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const pin = params.get("pin");
+
+    const dipendenti = JSON.parse(localStorage.getItem("dipendenti") || "[]");
+    const utente = dipendenti.find(d => d.pin === pin);
+
+    const intestazione = document.getElementById("intestazione");
+    if (!utente) {
+      intestazione.innerText = "Dipendente non trovato.";
+    } else {
+      intestazione.innerText = `${utente.nome} ${utente.cognome} – PIN ${pin}`;
+    }
+
+    const storico = JSON.parse(localStorage.getItem("storico") || "{}");
+    const datiUtente = storico[pin] || {};
+
+    const tbody = document.getElementById("tabella-storico");
+    const date = Object.keys(datiUtente).sort().reverse();
+
+    date.forEach(data => {
+      const sessioni = datiUtente[data];
+      const sessioniTxt = sessioni.map(s => {
+        const entrata = s.entrata || "--:--";
+        const uscita = s.uscita || "--:--";
+        return `Entrata ${entrata} / Uscita ${uscita}`;
+      }).join(" – ");
+
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${data}</td><td>${sessioniTxt}</td>`;
+      tbody.appendChild(row);
+    });
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Timbrature</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+
+    <h1 class="nome">DAVIDE DE ROSE</h1>
+    <h2 class="mese">Maggio 2025</h2>
+
+    <!-- FILTRO TEMPORALE -->
+    <div class="filtro-temporale">
+      <select id="filtro-mese">
+        <option>mese corrente</option>
+        <option>mese precedente</option>
+        <option>settimana corrente</option>
+        <option>personalizzato</option>
+      </select>
+      <input type="date" id="data-inizio" value="2025-05-01">
+      <input type="date" id="data-fine" value="2025-05-31">
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Giorno</th>
+          <th>Entrata</th>
+          <th>Uscita</th>
+          <th>Totale ore</th>
+        </tr>
+      </thead>
+      <tbody id="tabella-timbrature">
+        <!-- Le righe verranno generate via JS -->
+      </tbody>
+    </table>
+
+    <!-- CONTENITORE FINALE -->
+    <div class="footer-riga">
+      <button id="esporta">🗎 Esporta Excel</button>
+      <div class="totale">
+        <strong>Totale ore mensili:</strong> <span id="totale-mensile">0</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+

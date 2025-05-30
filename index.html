@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Timbratura</title>
+  <style>
+    body {
+      background-color: #0c111c;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 360px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: #1b2431;
+      border-radius: 20px;
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+
+    #pin {
+      font-size: 24px;
+      padding: 12px;
+      width: 100%;
+      border-radius: 10px;
+      border: none;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    #box-conferma {
+      display: block;
+      background-color: #e4e4e4;
+      color: black;
+      padding: 15px;
+      border-radius: 15px;
+      margin: 10px auto;
+      font-weight: bold;
+      font-size: 16px;
+      max-width: 300px;
+      white-space: pre-line;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .keypad button {
+      padding: 20px;
+      font-size: 22px;
+      border: none;
+      border-radius: 50%;
+      background-color: #3b3b3b;
+      color: white;
+      cursor: pointer;
+      width: 70px;
+      height: 70px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+
+    .actions button {
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 15px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .entrata-btn {
+      background-color: #009e0f;
+    }
+
+    .uscita-btn {
+      background-color: #e50914;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Timbratura</h1>
+    <input type="text" id="pin" placeholder="Inserisci PIN" maxlength="2">
+    <div id="box-conferma">Ultima timbratura: nessuna</div>
+
+    <div class="keypad">
+      <button onclick="aggiungiNumero('1')">1</button>
+      <button onclick="aggiungiNumero('2')">2</button>
+      <button onclick="aggiungiNumero('3')">3</button>
+      <button onclick="aggiungiNumero('4')">4</button>
+      <button onclick="aggiungiNumero('5')">5</button>
+      <button onclick="aggiungiNumero('6')">6</button>
+      <button onclick="aggiungiNumero('7')">7</button>
+      <button onclick="aggiungiNumero('8')">8</button>
+      <button onclick="aggiungiNumero('9')">9</button>
+      <button onclick="aggiungiNumero('0')">0</button>
+      <button onclick="cancella()">C</button>
+    </div>
+
+    <div class="actions">
+      <button class="entrata-btn" onclick="registraTimbratura('entrata')">Entrata</button>
+      <button class="uscita-btn" onclick="registraTimbratura('uscita')">Uscita</button>
+    </div>
+  </div>
+
+  <script>
+    function aggiungiNumero(numero) {
+      const pinInput = document.getElementById("pin");
+      if (pinInput.value.length < 2) {
+        pinInput.value += numero;
+      }
+    }
+
+    function cancella() {
+      document.getElementById("pin").value = "";
+    }
+
+    function registraTimbratura(tipo) {
+      const pin = document.getElementById("pin").value.trim();
+      if (!pin) {
+        alert("Inserisci il PIN");
+        return;
+      }
+
+      const dipendenti = JSON.parse(localStorage.getItem("dipendenti") || "[]");
+      const utente = dipendenti.find(d => d.pin === pin);
+      if (!utente) {
+        alert("PIN non valido");
+        return;
+      }
+
+      const oraAttuale = new Date();
+      const orario = oraAttuale.toTimeString().slice(0, 5);
+      const data = oraAttuale.toISOString().split("T")[0];
+
+      const storico = JSON.parse(localStorage.getItem("storico") || "{}");
+      if (!storico[pin]) storico[pin] = {};
+      if (!storico[pin][data]) storico[pin][data] = [];
+
+      const sessioni = storico[pin][data];
+
+      if (tipo === "entrata") {
+        sessioni.push({ entrata: orario });
+      } else if (tipo === "uscita") {
+        // CERCA L’ULTIMA ENTRATA SENZA USCITA
+        const ultima = sessioni.reverse().find(s => !s.uscita);
+        sessioni.reverse(); // ripristina ordine
+        if (!ultima) {
+          alert("Devi prima timbrare un'entrata");
+          return;
+        }
+        ultima.uscita = orario;
+      }
+
+      localStorage.setItem("storico", JSON.stringify(storico));
+      document.getElementById("box-conferma").innerText =
+        `✅ ${utente.nome} ${utente.cognome}\n${tipo.toUpperCase()} registrata alle ${orario}`;
+      document.getElementById("pin").value = "";
+    }
+  </script>
+</body>
+</html>
+

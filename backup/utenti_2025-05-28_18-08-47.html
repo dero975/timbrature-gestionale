@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Archivio Dipendenti</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      padding: 20px;
+    }
+    .container {
+      background-color: #1e293b;
+      padding: 20px;
+      border-radius: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: center;
+      padding: 10px;
+      border: 1px solid #334155;
+    }
+    th {
+      background-color: #111827;
+    }
+    td {
+      background-color: #1f2937;
+    }
+    .azione-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .azione-btn img {
+      width: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Archivio Dipendenti</h1>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+      <input type="text" id="nome" placeholder="Nome" style="flex: 1; min-width: 120px; padding: 10px; border-radius: 5px; border: none;" />
+      <input type="text" id="cognome" placeholder="Cognome" style="flex: 1; min-width: 120px; padding: 10px; border-radius: 5px; border: none;" />
+      <input type="text" id="pin" placeholder="PIN" style="width: 80px; padding: 10px; border-radius: 5px; border: none;" />
+      <input type="email" id="email" placeholder="Email" style="flex: 2; min-width: 180px; padding: 10px; border-radius: 5px; border: none;" />
+      <button onclick="aggiungiDipendente()" style="padding: 10px 20px; background-color: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer;">Aggiungi</button>
+    </div>
+
+    <table class="table table-bordered table-striped table-dark">
+      <thead>
+        <tr>
+          <th>Storico</th>
+          <th>PIN</th>
+          <th>Nome</th>
+          <th>Cognome</th>
+          <th>Email</th>
+          <th>Azioni</th>
+        </tr>
+      </thead>
+      <tbody id="tabella-dipendenti">
+        <!-- Dati dinamici -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function aggiungiDipendente() {
+      const nome = document.getElementById("nome").value.trim();
+      const cognome = document.getElementById("cognome").value.trim();
+      const pin = document.getElementById("pin").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      if (!nome || !cognome || !pin || !email) {
+        alert("Compila tutti i campi!");
+        return;
+      }
+
+      const nuovo = { pin, nome, cognome, email };
+      const lista = caricaLista();
+      lista.push(nuovo);
+      salvaLista(lista);
+      mostraLista();
+
+      document.getElementById("nome").value = "";
+      document.getElementById("cognome").value = "";
+      document.getElementById("pin").value = "";
+      document.getElementById("email").value = "";
+    }
+
+    function caricaLista() {
+      return JSON.parse(localStorage.getItem("dipendenti") || "[]");
+    }
+
+    function salvaLista(lista) {
+      localStorage.setItem("dipendenti", JSON.stringify(lista));
+    }
+
+    function mostraLista() {
+      const tbody = document.getElementById("tabella-dipendenti");
+      tbody.innerHTML = "";
+      const lista = caricaLista();
+
+      lista.forEach((d, index) => {
+        const riga = document.createElement("tr");
+        riga.innerHTML = `
+          <td>
+            <button class="azione-btn" onclick="apriStorico('${d.pin}')">
+              <img src="storico.png" alt="Storico">
+            </button>
+          </td>
+          <td>${d.pin}</td>
+          <td>${d.nome}</td>
+          <td>${d.cognome}</td>
+          <td>${d.email}</td>
+          <td>
+            <button class="azione-btn" onclick="modificaDipendente(${index})">
+              <img src="modifica.png" alt="Modifica">
+            </button>
+            <button class="azione-btn" onclick="eliminaDipendente(${index})">
+              <img src="cancella.png" alt="Elimina">
+            </button>
+          </td>
+        `;
+        tbody.appendChild(riga);
+      });
+    }
+
+    function modificaDipendente(index) {
+      const lista = caricaLista();
+      const d = lista[index];
+
+      document.getElementById("pin").value = d.pin;
+      document.getElementById("nome").value = d.nome;
+      document.getElementById("cognome").value = d.cognome;
+      document.getElementById("email").value = d.email;
+
+      lista.splice(index, 1);
+      salvaLista(lista);
+      mostraLista();
+    }
+
+    function eliminaDipendente(index) {
+      if (confirm("Sei sicuro di voler eliminare questo dipendente?")) {
+        const seconda = prompt("Digita 'SI' per confermare:");
+        if (seconda === "SI") {
+          const lista = caricaLista();
+          lista.splice(index, 1);
+          salvaLista(lista);
+          mostraLista();
+        } else {
+          alert("Cancellazione annullata.");
+        }
+      }
+    }
+
+    function apriStorico(pin) {
+      window.location.href = `storico.html?pin=${pin}`;
+    }
+
+    // Avvio automatico
+    mostraLista();
+
+    // Reload se si torna da storico.html con "indietro"
+    window.onpageshow = function(event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
+  </script>
+</body>
+</html>
+

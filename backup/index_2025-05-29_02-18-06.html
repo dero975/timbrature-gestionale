@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timbratura</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0f0f0f;
+      color: white;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    .contenitore {
+      background-color: #202020;
+      max-width: 400px;
+      margin: 30px auto;
+      padding: 20px;
+      border-radius: 20px;
+    }
+    input {
+      width: 100%;
+      font-size: 24px;
+      text-align: center;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .tastierino {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .tasto {
+      font-size: 24px;
+      border-radius: 50%;
+      padding: 20px;
+      border: none;
+      background-color: #333;
+      color: white;
+      cursor: pointer;
+      width: 70px;
+      height: 70px;
+    }
+    .azioni {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 15px;
+    }
+    .btn {
+      padding: 10px 25px;
+      font-size: 18px;
+      border-radius: 15px;
+      border: none;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+    }
+    .entrata { background-color: green; }
+    .uscita { background-color: red; }
+    .messaggio {
+      margin-top: 15px;
+      font-size: 18px;
+      color: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="contenitore">
+    <h1>Timbratura</h1>
+    <input type="password" id="pinInput" placeholder="Inserisci PIN" readonly />
+    <div id="ultimo" class="messaggio">Ultima timbratura: nessuna</div>
+
+    <div class="tastierino">
+      <button class="tasto" onclick="digita('1')">1</button>
+      <button class="tasto" onclick="digita('2')">2</button>
+      <button class="tasto" onclick="digita('3')">3</button>
+      <button class="tasto" onclick="digita('4')">4</button>
+      <button class="tasto" onclick="digita('5')">5</button>
+      <button class="tasto" onclick="digita('6')">6</button>
+      <button class="tasto" onclick="digita('7')">7</button>
+      <button class="tasto" onclick="digita('8')">8</button>
+      <button class="tasto" onclick="digita('9')">9</button>
+      <button class="tasto" onclick="cancella()">C</button>
+      <button class="tasto" onclick="digita('0')">0</button>
+    </div>
+
+    <div class="azioni">
+      <button class="btn entrata" onclick="timbra('entrata')">Entrata</button>
+      <button class="btn uscita" onclick="timbra('uscita')">Uscita</button>
+    </div>
+  </div>
+
+  <script>
+    function digita(numero) {
+      const campo = document.getElementById('pinInput');
+      if (campo.value.length < 2) {
+        campo.value += numero;
+      }
+    }
+
+    function cancella() {
+      document.getElementById('pinInput').value = '';
+    }
+
+    function timbra(tipo) {
+      const pin = document.getElementById('pinInput').value.trim();
+      if (!pin) {
+        alert("Inserisci il PIN!");
+        return;
+      }
+
+      const lista = JSON.parse(localStorage.getItem("dipendenti") || "[]");
+      const utente = lista.find(u => u.pin === pin);
+
+      if (!utente) {
+        alert("PIN non valido!");
+        return;
+      }
+
+      const oggi = new Date();
+      const data = oggi.toLocaleDateString("it-IT");
+      const ora = oggi.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+
+      const storico = JSON.parse(localStorage.getItem("storico") || "{}");
+      if (!storico[pin]) storico[pin] = [];
+
+      let riga = storico[pin].find(r => r.data === data);
+      if (!riga) {
+        riga = { data, entrata: "", uscita: "", ore: "" };
+        storico[pin].push(riga);
+      }
+
+      if (tipo === "entrata") {
+        if (riga.entrata) {
+          alert("Entrata già registrata oggi.");
+          return;
+        }
+        riga.entrata = ora;
+        aggiornaUltima(`${utente.nome} ${utente.cognome} - ENTRATA ore ${ora}`);
+      } else {
+        if (riga.uscita) {
+          alert("Uscita già registrata oggi.");
+          return;
+        }
+        riga.uscita = ora;
+
+        if (riga.entrata) {
+          const [h1, m1] = riga.entrata.split(":").map(Number);
+          const [h2, m2] = ora.split(":").map(Number);
+          const totMinuti = h2 * 60 + m2 - (h1 * 60 + m1);
+          const h = Math.floor(totMinuti / 60);
+          const m = totMinuti % 60;
+          riga.ore = `${h}h ${m}m`;
+        }
+        aggiornaUltima(`${utente.nome} ${utente.cognome} - USCITA ore ${ora}`);
+      }
+
+      localStorage.setItem("storico", JSON.stringify(storico));
+      document.getElementById("pinInput").value = "";
+    }
+
+    function aggiornaUltima(msg) {
+      document.getElementById("ultimo").textContent = `Ultima timbratura: ${msg}`;
+    }
+  </script>
+</body>
+</html>
+

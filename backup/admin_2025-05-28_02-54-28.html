@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Timbrature</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1 class="nome">DAVIDE DE ROSE</h1>
+    <h2 class="mese">Maggio 2025</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Giorno</th>
+          <th>Entrata</th>
+          <th>Uscita</th>
+          <th>Totale ore</th>
+        </tr>
+      </thead>
+      <tbody id="tabella-timbrature">
+        <!-- Le righe verranno generate via JS -->
+      </tbody>
+    </table>
+    <div class="totale">
+      <strong>Totale ore mensili:</strong> <span id="totale-mensile">0</span>
+    </div>
+    <button id="esporta">🗎 Esporta Excel</button>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+

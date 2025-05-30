@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Timbratura</title>
   <style>
     body {
@@ -11,7 +11,6 @@
       text-align: center;
       margin: 0;
     }
-
     .container {
       max-width: 360px;
       margin: 40px auto;
@@ -19,12 +18,10 @@
       background-color: #1b2431;
       border-radius: 20px;
     }
-
     h1 {
       font-size: 26px;
       margin-bottom: 20px;
     }
-
     #pin {
       font-size: 24px;
       padding: 12px;
@@ -34,7 +31,6 @@
       text-align: center;
       margin-bottom: 10px;
     }
-
     #box-conferma {
       display: block;
       background-color: #e4e4e4;
@@ -47,14 +43,12 @@
       max-width: 300px;
       white-space: pre-line;
     }
-
     .keypad {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       margin: 20px 0;
     }
-
     .keypad button {
       padding: 20px;
       font-size: 22px;
@@ -66,13 +60,11 @@
       width: 70px;
       height: 70px;
     }
-
     .actions {
       display: flex;
       justify-content: space-around;
       margin-top: 10px;
     }
-
     .actions button {
       padding: 15px 30px;
       font-size: 18px;
@@ -81,20 +73,29 @@
       color: white;
       cursor: pointer;
     }
-
     .entrata-btn {
       background-color: #009e0f;
     }
-
     .uscita-btn {
       background-color: #e50914;
     }
   </style>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabase = createClient(
+      'https://pylfpqitdogatlsndxtf.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bGZwcWl0ZG9nYXRsc25keHRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNzU5OTcsImV4cCI6MjA2Mzk1MTk5N30.GXWmglDP7WcLSozta8UT6Ktd9XzIXSCxC5pJ4oWX3LU'
+    );
+
+    window.supabase = supabase;
+  </script>
 </head>
 <body>
   <div class="container">
     <h1>Timbratura</h1>
-    <input type="text" id="pin" placeholder="Inserisci PIN" maxlength="2">
+    <input type="text" id="pin" placeholder="Inserisci PIN" maxlength="2" />
     <div id="box-conferma">Ultima timbratura: nessuna</div>
 
     <div class="keypad">
@@ -119,46 +120,44 @@
 
   <script>
     function aggiungiNumero(numero) {
-      const pinInput = document.getElementById("pin");
+      const pinInput = document.getElementById('pin');
       if (pinInput.value.length < 2) {
         pinInput.value += numero;
       }
     }
 
     function cancella() {
-      document.getElementById("pin").value = "";
+      document.getElementById('pin').value = '';
     }
 
-    function registraTimbratura(tipo) {
-      const pin = document.getElementById("pin").value.trim();
+    async function registraTimbratura(tipo) {
+      const pin = document.getElementById('pin').value.trim();
       if (!pin) {
-        alert("Inserisci il PIN");
+        alert('Inserisci il PIN');
         return;
       }
 
-      const dipendenti = JSON.parse(localStorage.getItem("dipendenti") || "[]");
-      const utente = dipendenti.find(d => d.pin === pin);
+      const dipendenti = JSON.parse(localStorage.getItem('dipendenti') || '[]');
+      const utente = dipendenti.find((d) => d.pin === pin);
       if (!utente) {
-        alert("PIN non valido");
+        alert('PIN non valido');
         return;
       }
 
       const oraAttuale = new Date();
       const orario = oraAttuale.toTimeString().slice(0, 5);
-      const data = oraAttuale.toISOString().split("T")[0];
+      const data = oraAttuale.toISOString().split('T')[0];
 
-      const storico = JSON.parse(localStorage.getItem("storico") || "{}");
+      const storico = JSON.parse(localStorage.getItem('storico') || '{}');
       if (!storico[pin]) storico[pin] = {};
       if (!storico[pin][data]) storico[pin][data] = [];
 
       const sessioni = storico[pin][data];
 
-      if (tipo === "entrata") {
+      if (tipo === 'entrata') {
         sessioni.push({ entrata: orario });
-      } else if (tipo === "uscita") {
-        // CERCA L’ULTIMA ENTRATA SENZA USCITA
-        const ultima = sessioni.reverse().find(s => !s.uscita);
-        sessioni.reverse(); // ripristina ordine
+      } else if (tipo === 'uscita') {
+        const ultima = sessioni.slice().reverse().find((s) => !s.uscita);
         if (!ultima) {
           alert("Devi prima timbrare un'entrata");
           return;
@@ -166,10 +165,28 @@
         ultima.uscita = orario;
       }
 
-      localStorage.setItem("storico", JSON.stringify(storico));
-      document.getElementById("box-conferma").innerText =
-        `✅ ${utente.nome} ${utente.cognome}\n${tipo.toUpperCase()} registrata alle ${orario}`;
-      document.getElementById("pin").value = "";
+      localStorage.setItem('storico', JSON.stringify(storico));
+
+      document.getElementById('box-conferma').innerText = `✅ ${utente.nome} ${utente.cognome}\n${tipo.toUpperCase()} registrata alle ${orario}`;
+      document.getElementById('pin').value = '';
+
+      const { error } = await window.supabase.from('timbrature').insert([
+        {
+          pin: utente.pin,
+          nome: `${utente.nome} ${utente.cognome}`,
+          tipo,
+          data,
+          ora: orario,
+          timestamp: new Date().toISOString()
+        }
+      ]);
+
+      if (error) {
+        alert('Errore salvataggio su Supabase: ' + error.message);
+        console.error(error);
+      } else {
+        console.log('✅ Timbratura salvata su Supabase');
+      }
     }
   </script>
 </body>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test Supabase</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+  <h1>Test Supabase</h1>
+  <button onclick="salvaTimbratura()">Test Salvataggio</button>
+
+  <script>
+    const { createClient } = supabase;
+    const client = createClient(
+      'https://pylfpqitdogatlsndxtf.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bGZwcWl0ZG9nYXRsc25keHRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNzU5OTcsImV4cCI6MjA2Mzk1MTk5N30.GXWmglDP7WcLSozta8UT6Ktd9XzIXSCxC5pJ4oWX3LU'
+    );
+
+    async function salvaTimbratura() {
+      const nuovaTimbratura = {
+        pin: "01",
+        tipo: "entrata",
+        timestamp: new Date().toISOString(),
+        data: new Date().toISOString().slice(0, 10),
+        ora: new Date().toTimeString().slice(0, 5),
+        nome: "Mario Rossi"
+      };
+
+      console.log("📦 Tentativo di salvataggio su 'timbrature'");
+      console.log("👉 Inserisco:", nuovaTimbratura);
+
+      const { data, error } = await client.from("timbrature").insert([nuovaTimbratura]);
+
+      console.log("✅ Data:", data);
+      console.log("❌ Error:", error);
+      alert(error ? "❌ Errore nel salvataggio" : "✅ Salvataggio riuscito");
+    }
+  </script>
+</body>
+</html>
+

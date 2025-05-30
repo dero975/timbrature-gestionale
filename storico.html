@@ -14,14 +14,14 @@
   <h2 class="titolo-secondario">Storico Timbrature</h2>
   <h1 id="nomeUtente" class="nome-utente">Mario Rossi</h1>
 
+  <!-- ✅ FILTRO PERIODO MODIFICATO -->
   <div class="filtro-mese">
     <select id="selettoreMese" class="data-box">
       <option value="corrente">mese corrente</option>
       <option value="precedente">mese precedente</option>
-      <option value="personalizzato">personalizzato</option>
     </select>
-    <div class="data-box" id="dataInizio">01/05/2025</div>
-    <div class="data-box" id="dataFine">31/05/2025</div>
+    <input type="date" id="dataInizio" class="data-box" />
+    <input type="date" id="dataFine" class="data-box" />
   </div>
 
   <div class="contenitore-tabella">
@@ -51,7 +51,7 @@
 
   <script>
     (function() {
-      emailjs.init("TUA_USER_ID"); // Sostituisci con il tuo ID
+      emailjs.init("TUA_USER_ID"); // Sostituisci con il tuo ID EmailJS
     })();
   </script>
   <script src="script.js"></script>

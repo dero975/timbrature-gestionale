@@ -105,3 +105,9 @@
   color: black;
 }
 
+/* Personalizza l'icona calendario */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(62%) sepia(90%) saturate(400%) hue-rotate(5deg);
+  cursor: pointer;
+}
+

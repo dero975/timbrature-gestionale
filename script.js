@@ -73,10 +73,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputInizio = document.getElementById("dataInizio");
   const inputFine = document.getElementById("dataFine");
 
-  selettore.addEventListener("change", aggiornaPeriodo);
-  inputInizio.addEventListener("change", aggiornaPeriodo);
-  inputFine.addEventListener("change", aggiornaPeriodo);
+  // Eventi
+  selettore.addEventListener("change", () => {
+    if (selettore.value === "corrente") {
+      impostaRangeMeseCorrente();
+    } else if (selettore.value === "precedente") {
+      impostaRangeMesePrecedente();
+    }
+  });
 
+  inputInizio.addEventListener("change", () => {
+    generaRighe(inputInizio.value, inputFine.value);
+  });
+
+  inputFine.addEventListener("change", () => {
+    generaRighe(inputInizio.value, inputFine.value);
+  });
+
+  // Imposta inizialmente il mese corrente
   impostaRangeMeseCorrente();
 
   function impostaRangeMeseCorrente() {
@@ -95,17 +109,6 @@ document.addEventListener("DOMContentLoaded", () => {
     inputInizio.value = primo;
     inputFine.value = ultimo;
     generaRighe(primo, ultimo);
-  }
-
-  function aggiornaPeriodo() {
-    const valore = selettore.value;
-    if (valore === "corrente") {
-      impostaRangeMeseCorrente();
-    } else if (valore === "precedente") {
-      impostaRangeMesePrecedente();
-    } else {
-      generaRighe(inputInizio.value, inputFine.value);
-    }
   }
 
   function generaRighe(dataInizio, dataFine) {

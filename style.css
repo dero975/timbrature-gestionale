@@ -107,7 +107,7 @@
 
 /* Personalizza l'icona calendario */
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(62%) sepia(90%) saturate(400%) hue-rotate(5deg);
+  filter: brightness(0) saturate(100%) invert(75%) sepia(100%) hue-rotate(25deg);
   cursor: pointer;
 }
 

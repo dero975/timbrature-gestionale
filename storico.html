@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
 </head>
 <body class="body-dark">
 
@@ -16,6 +17,8 @@
   <div class="filtro-mese">
     <select id="selettoreMese" class="data-box">
       <option value="corrente">mese corrente</option>
+      <option value="precedente">mese precedente</option>
+      <option value="personalizzato">personalizzato</option>
     </select>
     <div class="data-box" id="dataInizio">01/05/2025</div>
     <div class="data-box" id="dataFine">31/05/2025</div>
@@ -32,7 +35,7 @@
         </tr>
       </thead>
       <tbody id="tabellaTimbrature">
-        <!-- Popolato da script.js -->
+        <!-- Popolato da script -->
       </tbody>
     </table>
     <div class="totale-mensile">
@@ -48,7 +51,7 @@
 
   <script>
     (function() {
-      emailjs.init("TUA_USER_ID"); // Inserisci il tuo ID di EmailJS
+      emailjs.init("TUA_USER_ID"); // Sostituisci con il tuo ID
     })();
   </script>
   <script src="script.js"></script>

@@ -2,6 +2,11 @@
 let pin = "";
 let utenti = [];
 
+// === CONNESSIONE A SUPABASE ===
+const SUPABASE_URL = "https://pylfpqitdogatlsndxtf.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bGZwcWl0ZG9nYXRsc25keHRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNzU5OTcsImV4cCI6MjA2Mzk1MTk5N30.GXWmglDP7WcLSozta8UT6Ktd9XzIXSCxC5pJ4oWX3LU";
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // === FUNZIONI PER index.html (Timbrature) ===
 async function caricaUtenti() {
   const response = await fetch("utenti.html");
@@ -42,17 +47,36 @@ function cancella() {
   aggiornaDisplayPin();
 }
 
-function registraTimbratura(tipo) {
+async function registraTimbratura(tipo) {
   const utente = utenti.find(u => u.pin === pin);
-  const ora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const oraAttuale = new Date();
+  const oraString = oraAttuale.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dataISO = oraAttuale.toISOString().split("T")[0];
 
   if (!utente) {
     document.getElementById("confirma").textContent = "PIN non valido";
     document.getElementById("confirma").style.background = "#dc3545";
   } else {
-    document.getElementById("confirma").textContent = `${utente.nome.toUpperCase()} ha timbrato: ${tipo}`;
-    document.getElementById("confirma").style.background = "#ccc";
-    document.getElementById("ultima").textContent = `Ultima timbratura: ${tipo} ${ora}`;
+    const { error } = await supabase.from("timbrature").insert([
+      {
+        tipo: tipo,
+        pin: pin,
+        nome: `${utente.nome} ${utente.cognome}`,
+        timestamp: oraAttuale.toISOString(),
+        data: dataISO,
+        ora: oraString
+      }
+    ]);
+
+    if (error) {
+      console.error("Errore salvataggio:", error.message);
+      document.getElementById("confirma").textContent = "❌ Errore salvataggio";
+      document.getElementById("confirma").style.background = "#dc3545";
+    } else {
+      document.getElementById("confirma").textContent = `${utente.nome.toUpperCase()} ha timbrato: ${tipo}`;
+      document.getElementById("confirma").style.background = "#ccc";
+      document.getElementById("ultima").textContent = `Ultima timbratura: ${tipo} ${oraString}`;
+    }
   }
 
   pin = "";
@@ -73,7 +97,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputInizio = document.getElementById("dataInizio");
   const inputFine = document.getElementById("dataFine");
 
-  // Eventi
   selettore.addEventListener("change", () => {
     if (selettore.value === "corrente") {
       impostaRangeMeseCorrente();
@@ -90,7 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
     generaRighe(inputInizio.value, inputFine.value);
   });
 
-  // Imposta inizialmente il mese corrente
   impostaRangeMeseCorrente();
 
   function impostaRangeMeseCorrente() {
@@ -122,7 +144,9 @@ document.addEventListener("DOMContentLoaded", () => {
     while (giorno <= fine) {
       const riga = document.createElement("tr");
 
-      const giornoNome = giorno.setLocale("it").toFormat("cccc d");
+      const raw = giorno.setLocale("it").toFormat("cccc d");
+      const giornoNome = raw.charAt(0).toUpperCase() + raw.slice(1);
+
       const tdGiorno = document.createElement("td");
       tdGiorno.textContent = giornoNome;
 

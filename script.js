@@ -13,7 +13,7 @@ async function caricaUtenti() {
 
   utenti = [];
   righe.forEach((riga, index) => {
-    if (index === 0) return; // salta intestazione
+    if (index === 0) return;
     const celle = riga.querySelectorAll("td");
     if (celle.length >= 3) {
       utenti.push({
@@ -70,47 +70,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const DateTime = luxon.DateTime;
   const selettore = document.getElementById("selettoreMese");
-  const divInizio = document.getElementById("dataInizio");
-  const divFine = document.getElementById("dataFine");
+  const inputInizio = document.getElementById("dataInizio");
+  const inputFine = document.getElementById("dataFine");
 
   selettore.addEventListener("change", aggiornaPeriodo);
-  divInizio.addEventListener("blur", aggiornaPeriodo);
-  divFine.addEventListener("blur", aggiornaPeriodo);
+  inputInizio.addEventListener("change", aggiornaPeriodo);
+  inputFine.addEventListener("change", aggiornaPeriodo);
 
   impostaRangeMeseCorrente();
 
   function impostaRangeMeseCorrente() {
     const oggi = DateTime.now();
-    const primo = oggi.startOf("month").toFormat("dd/MM/yyyy");
-    const ultimo = oggi.endOf("month").toFormat("dd/MM/yyyy");
-    divInizio.textContent = primo;
-    divFine.textContent = ultimo;
-    disabilitaModificaDate();
+    const primo = oggi.startOf("month").toFormat("yyyy-MM-dd");
+    const ultimo = oggi.endOf("month").toFormat("yyyy-MM-dd");
+    inputInizio.value = primo;
+    inputFine.value = ultimo;
     generaRighe(primo, ultimo);
   }
 
   function impostaRangeMesePrecedente() {
     const oggi = DateTime.now().minus({ months: 1 });
-    const primo = oggi.startOf("month").toFormat("dd/MM/yyyy");
-    const ultimo = oggi.endOf("month").toFormat("dd/MM/yyyy");
-    divInizio.textContent = primo;
-    divFine.textContent = ultimo;
-    disabilitaModificaDate();
+    const primo = oggi.startOf("month").toFormat("yyyy-MM-dd");
+    const ultimo = oggi.endOf("month").toFormat("yyyy-MM-dd");
+    inputInizio.value = primo;
+    inputFine.value = ultimo;
     generaRighe(primo, ultimo);
-  }
-
-  function abilitaModificaDate() {
-    divInizio.contentEditable = true;
-    divFine.contentEditable = true;
-    divInizio.style.border = "1px solid white";
-    divFine.style.border = "1px solid white";
-  }
-
-  function disabilitaModificaDate() {
-    divInizio.contentEditable = false;
-    divFine.contentEditable = false;
-    divInizio.style.border = "none";
-    divFine.style.border = "none";
   }
 
   function aggiornaPeriodo() {
@@ -119,20 +103,19 @@ document.addEventListener("DOMContentLoaded", () => {
       impostaRangeMeseCorrente();
     } else if (valore === "precedente") {
       impostaRangeMesePrecedente();
-    } else if (valore === "personalizzato") {
-      abilitaModificaDate();
-      const inizio = divInizio.textContent.trim();
-      const fine = divFine.textContent.trim();
-      generaRighe(inizio, fine);
+    } else {
+      generaRighe(inputInizio.value, inputFine.value);
     }
   }
 
   function generaRighe(dataInizio, dataFine) {
     tbody.innerHTML = "";
-    const inizio = DateTime.fromFormat(dataInizio, "dd/MM/yyyy");
-    const fine = DateTime.fromFormat(dataFine, "dd/MM/yyyy");
+    if (!dataInizio || !dataFine) return;
 
+    const inizio = DateTime.fromISO(dataInizio);
+    const fine = DateTime.fromISO(dataFine);
     let giorno = inizio;
+
     while (giorno <= fine) {
       const riga = document.createElement("tr");
 

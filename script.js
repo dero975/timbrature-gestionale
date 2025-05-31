@@ -1,79 +1,19 @@
-// === VARIABILI GLOBALI ===
-let pin = "";
-let utenti = [];
-
-// === FUNZIONI PER index.html (Timbrature) ===
-async function caricaUtenti() {
-  const response = await fetch("utenti.html");
-  const text = await response.text();
-
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(text, "text/html");
-  const righe = doc.querySelectorAll("table tr");
-
-  utenti = [];
-  righe.forEach((riga, index) => {
-    if (index === 0) return;
-    const celle = riga.querySelectorAll("td");
-    if (celle.length >= 3) {
-      utenti.push({
-        nome: celle[0].textContent.trim(),
-        cognome: celle[1].textContent.trim(),
-        pin: celle[2].textContent.trim()
-      });
-    }
-  });
-}
-
-function aggiornaDisplayPin() {
-  const display = document.getElementById("display");
-  if (display) display.textContent = pin;
-}
-
-function aggiungiNumero(numero) {
-  if (pin.length < 2) {
-    pin += numero;
-    aggiornaDisplayPin();
-  }
-}
-
-function cancella() {
-  pin = "";
-  aggiornaDisplayPin();
-}
-
-function registraTimbratura(tipo) {
-  const utente = utenti.find(u => u.pin === pin);
-  const ora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-  if (!utente) {
-    document.getElementById("confirma").textContent = "PIN non valido";
-    document.getElementById("confirma").style.background = "#dc3545";
-  } else {
-    document.getElementById("confirma").textContent = `${utente.nome.toUpperCase()} ha timbrato: ${tipo}`;
-    document.getElementById("confirma").style.background = "#ccc";
-    document.getElementById("ultima").textContent = `Ultima timbratura: ${tipo} ${ora}`;
-  }
-
-  pin = "";
-  aggiornaDisplayPin();
-}
-
-// === FUNZIONI PER storico.html ===
 document.addEventListener("DOMContentLoaded", () => {
-  const pinParam = new URLSearchParams(window.location.search).get("pin");
+  const DateTime = luxon.DateTime;
+  const pin = new URLSearchParams(window.location.search).get("pin");
   const nomeEl = document.getElementById("nomeUtente");
   const tbody = document.getElementById("tabellaTimbrature");
   const totaleOreSpan = document.getElementById("totaleOre");
-
-  if (!pinParam || !tbody || !nomeEl) return;
-
-  const DateTime = luxon.DateTime;
   const selettore = document.getElementById("selettoreMese");
   const inputInizio = document.getElementById("dataInizio");
   const inputFine = document.getElementById("dataFine");
 
-  // Eventi
+  if (!pin || !tbody || !nomeEl) return;
+
+  // Supabase client - assicurati che window.supabase sia inizializzato in storico.html
+  const supabase = window.supabase;
+
+  // Gestione filtro periodo
   selettore.addEventListener("change", () => {
     if (selettore.value === "corrente") {
       impostaRangeMeseCorrente();
@@ -83,69 +23,122 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   inputInizio.addEventListener("change", () => {
-    generaRighe(inputInizio.value, inputFine.value);
+    caricaEVisualizzaStorico(inputInizio.value, inputFine.value);
   });
 
   inputFine.addEventListener("change", () => {
-    generaRighe(inputInizio.value, inputFine.value);
+    caricaEVisualizzaStorico(inputInizio.value, inputFine.value);
   });
 
+  // Imposta inizialmente il mese corrente
   impostaRangeMeseCorrente();
 
+  // Funzione principale che carica e mostra lo storico
+  async function caricaEVisualizzaStorico(dataInizio, dataFine) {
+    tbody.innerHTML = "";
+    totaleOreSpan.textContent = "0 ore";
+
+    const inizio = DateTime.fromISO(dataInizio);
+    const fine = DateTime.fromISO(dataFine);
+
+    if (inizio > fine) {
+      alert("La data inizio deve essere precedente alla data fine");
+      return;
+    }
+
+    // Query a Supabase per timbrature utente e date filtrate
+    const { data, error } = await supabase
+      .from("timbrature")
+      .select("*")
+      .eq("pin", pin)
+      .gte("data", dataInizio)
+      .lte("data", dataFine)
+      .order("data", { ascending: true })
+      .order("ora", { ascending: true });
+
+    if (error) {
+      alert("Errore caricamento storico: " + error.message);
+      console.error(error);
+      return;
+    }
+
+    // Visualizza nome utente
+    if (data.length > 0) {
+      nomeEl.textContent = data[0].nome;
+    } else {
+      nomeEl.textContent = "Utente sconosciuto";
+    }
+
+    // Raggruppa timbrature per giorno
+    const giorni = {};
+    data.forEach(item => {
+      if (!giorni[item.data]) {
+        giorni[item.data] = { entrate: [], uscite: [] };
+      }
+      if (item.tipo === "entrata") {
+        giorni[item.data].entrate.push(item.ora);
+      } else if (item.tipo === "uscita") {
+        giorni[item.data].uscite.push(item.ora);
+      }
+    });
+
+    // Crea righe tabella per ogni giorno del range
+    let totaleOre = 0;
+    let giorno = inizio;
+
+    while (giorno <= fine) {
+      const giornoStr = giorno.toISODate();
+      const entrate = giorni[giornoStr]?.entrate || [];
+      const uscite = giorni[giornoStr]?.uscite || [];
+
+      // Calcola ore totali per il giorno
+      let oreGiornaliere = 0;
+      const coppie = Math.min(entrate.length, uscite.length);
+      for (let i = 0; i < coppie; i++) {
+        const inizio = DateTime.fromISO(`${giornoStr}T${entrate[i]}:00`);
+        const fine = DateTime.fromISO(`${giornoStr}T${uscite[i]}:00`);
+        oreGiornaliere += fine.diff(inizio, "hours").hours;
+      }
+      totaleOre += oreGiornaliere;
+
+      // Formatta giorno e ore
+      const giornoNomeRaw = giorno.setLocale("it").toFormat("cccc d");
+      const giornoNome = giornoNomeRaw.charAt(0).toUpperCase() + giornoNomeRaw.slice(1);
+      const oreFormattate = oreGiornaliere.toFixed(2);
+
+      // Crea riga
+      const riga = document.createElement("tr");
+      riga.innerHTML = `
+        <td>${giornoNome}</td>
+        <td>${entrate.join(", ") || "—"}</td>
+        <td>${uscite.join(", ") || "—"}</td>
+        <td>${oreFormattate}</td>
+      `;
+      tbody.appendChild(riga);
+
+      giorno = giorno.plus({ days: 1 });
+    }
+
+    totaleOreSpan.textContent = totaleOre.toFixed(2) + " ore";
+  }
+
+  // Funzioni per filtro mese corrente e precedente
   function impostaRangeMeseCorrente() {
     const oggi = DateTime.now();
-    const primo = oggi.startOf("month").toFormat("yyyy-MM-dd");
-    const ultimo = oggi.endOf("month").toFormat("yyyy-MM-dd");
+    const primo = oggi.startOf("month").toISODate();
+    const ultimo = oggi.endOf("month").toISODate();
     inputInizio.value = primo;
     inputFine.value = ultimo;
-    generaRighe(primo, ultimo);
+    caricaEVisualizzaStorico(primo, ultimo);
   }
 
   function impostaRangeMesePrecedente() {
     const oggi = DateTime.now().minus({ months: 1 });
-    const primo = oggi.startOf("month").toFormat("yyyy-MM-dd");
-    const ultimo = oggi.endOf("month").toFormat("yyyy-MM-dd");
+    const primo = oggi.startOf("month").toISODate();
+    const ultimo = oggi.endOf("month").toISODate();
     inputInizio.value = primo;
     inputFine.value = ultimo;
-    generaRighe(primo, ultimo);
-  }
-
-  function generaRighe(dataInizio, dataFine) {
-    tbody.innerHTML = "";
-    if (!dataInizio || !dataFine) return;
-
-    const inizio = DateTime.fromISO(dataInizio);
-    const fine = DateTime.fromISO(dataFine);
-    let giorno = inizio;
-
-    while (giorno <= fine) {
-      const riga = document.createElement("tr");
-
-      const raw = giorno.setLocale("it").toFormat("cccc d");
-      const giornoNome = raw.charAt(0).toUpperCase() + raw.slice(1);
-
-      const tdGiorno = document.createElement("td");
-      tdGiorno.textContent = giornoNome;
-
-      const tdEntrata = document.createElement("td");
-      tdEntrata.textContent = "—";
-
-      const tdUscita = document.createElement("td");
-      tdUscita.textContent = "—";
-
-      const tdTotale = document.createElement("td");
-      tdTotale.textContent = "0";
-
-      riga.appendChild(tdGiorno);
-      riga.appendChild(tdEntrata);
-      riga.appendChild(tdUscita);
-      riga.appendChild(tdTotale);
-
-      tbody.appendChild(riga);
-      giorno = giorno.plus({ days: 1 });
-    }
-
-    totaleOreSpan.textContent = "0 ore";
+    caricaEVisualizzaStorico(primo, ultimo);
   }
 });
 

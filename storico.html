@@ -8,6 +8,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+
+  <!-- Inizializzazione Supabase -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabase = createClient(
+      'https://pylfpqitdogatlsndxtf.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bGZwcWl0ZG9nYXRsc25keHRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzNzU5OTcsImV4cCI6MjA2Mzk1MTk5N30.GXWmglDP7WcLSozta8UT6Ktd9XzIXSCxC5pJ4oWX3LU'
+    );
+
+    window.supabase = supabase;
+  </script>
+
 </head>
 <body class="body-dark">
 
@@ -35,7 +48,7 @@
         </tr>
       </thead>
       <tbody id="tabellaTimbrature">
-        <!-- Popolato da script -->
+        <!-- Popolato da script.js -->
       </tbody>
     </table>
     <div class="totale-mensile">
@@ -54,6 +67,7 @@
       emailjs.init("TUA_USER_ID"); // Sostituisci con il tuo ID EmailJS
     })();
   </script>
+
   <script src="script.js"></script>
 </body>
 </html>
